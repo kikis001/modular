@@ -1,5 +1,6 @@
 import { IsNotEmpty, IsString, IsNumber, IsPositive, IsUrl } from "class-validator";
 import { ApiProperty, PartialType } from "@nestjs/swagger";
+import { Category } from "../entities/category.entity";
 
 export class CreateProductDto {
   @IsString()
@@ -23,6 +24,8 @@ export class CreateProductDto {
   @IsUrl()
   @IsNotEmpty()
   readonly image: string;
+
+  readonly category: Category
 }
 
 // PartialType nos ayuda a que todos las propiedades sean opcionales

@@ -1,64 +1,43 @@
 import { Injectable, NotFoundException, Inject } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
+import { Model } from 'mongoose';
 
 import { User, Role } from '../entities/user.entity';
 import { CreateUserDto, UpdateUserDto } from '../dtos/user.dto';
+import { InjectModel } from '@nestjs/mongoose';
 
 @Injectable()
 export class UsersService {
   constructor(
-    private configService: ConfigService
+    @InjectModel(User.name) private productModel: Model<User>
   ) {}
 
-  private counterId = 1;
-  private users: User[] = [
-    {
-      id: 1,
-      email: 'kayaba@gmail.com',
-      password: 'helloworld',
-      role: Role.ADMIN,
-    },
-  ];
   findAll() {
-    const apiKey = this.configService.get('API_KEY')
-    console.log(apiKey)
-    return this.users;
+    return this.productModel.find().exec()
   }
 
-  findOne(id: number) {
-    const user = this.users.find((item) => item.id === id )
-    if(!user) {
-      throw new NotFoundException(`User #${id} not found`)
+  findOne(id: string) {
+    const product = this.productModel.findById(id).exec();
+    if (!product) {
+      throw new NotFoundException(`Product #${id} not found`);
     }
-    return user
+    return product;
   }
 
   create(data: CreateUserDto) {
-    this.counterId = this.counterId + 1
-    const newUser = {
-      id: this.counterId,
-      ...data,
-    }
-    this.users.push(newUser);
-    return newUser;
+    const newProduct = new this.productModel(data)
+    return newProduct.save();
   }
 
-  update(id: number, data: UpdateUserDto) {
-    const user = this.findOne(id)
-    const index = this.users.findIndex((item) => item.id === id)
-    this.users[index] = {
-      ...user,
-      ...data
+  update(id: string, changes: UpdateUserDto) {
+    const product = this.productModel.findByIdAndUpdate(id, { $set: changes }, { new: true })
+    if (!product) {
+      throw new NotFoundException(`Product #${id} not found`);
     }
-    return this.users[index]
+    return product;
   }
 
-  remove(id: number) {
-    const index = this.users.findIndex((item) => item.id === id)
-    if(index === -1) {
-      throw new NotFoundException(`User #${id} not found`)
-    }
-    this.users.splice(index, 1)
-    return true
+  remove(id: string) {
+    return this.productModel.findByIdAndDelete(id)
   }
 }

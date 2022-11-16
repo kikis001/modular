@@ -31,6 +31,9 @@ export class ProductsService {
 
   update(id: string, changes: UpdateProductDto) {
     const product = this.productModel.findByIdAndUpdate(id, { $set: changes }, { new: true })
+    if (!product) {
+      throw new NotFoundException(`Product #${id} not found`);
+    }
     return product;
   }
 

@@ -12,6 +12,7 @@ import {
   Res,
   // ParseIntPipe,
 } from '@nestjs/common';
+import { MongoIdPipe } from 'src/common/mongo-id.pipe';
 
 import { CreateProductDto, UpdateProductDto } from '../dtos/product.dtos';
 import { ProductsService } from './../services/products.service';
@@ -21,6 +22,7 @@ export class ProductsController {
   constructor(private productsService: ProductsService) {}
 
   @Get()
+  @HttpCode(HttpStatus.OK)
   getProducts(
     @Query('limit') limit = 100,
     @Query('offset') offset = 0,
@@ -37,31 +39,27 @@ export class ProductsController {
     return `yo soy un filter`;
   }
 
-  @Get(':productId')
+  @Get(':id')
   @HttpCode(HttpStatus.ACCEPTED)
-  getOne(@Param('productId') productId: string) {
-    // response.status(200).send({
-    //   message: `product ${productId}`,
-    // });
-    return this.productsService.findOne(productId);
+  getOne(@Param('id', MongoIdPipe) id: string) {
+    return this.productsService.findOne(id);
   }
 
   @Post()
+  @HttpCode(HttpStatus.CREATED)
   create(@Body() payload: CreateProductDto) {
-    // return {
-    //   message: 'accion de crear',
-    //   payload,
-    // };
     return this.productsService.create(payload);
   }
 
   @Put(':id')
-  update(@Param('id') id: string, @Body() payload: UpdateProductDto) {
+  @HttpCode(HttpStatus.OK)
+  update(@Param('id', MongoIdPipe) id: string, @Body() payload: UpdateProductDto) {
     return this.productsService.update(id, payload);
   }
 
   @Delete(':id')
-  delete(@Param('id') id: string) {
+  @HttpCode(HttpStatus.OK)
+  delete(@Param('id', MongoIdPipe) id: string) {
     return this.productsService.remove(id);
   }
 }
